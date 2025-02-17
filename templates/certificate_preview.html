@@ -1,0 +1,361 @@
+<!--This is certificate_preview.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Preview</title>
+    <style>
+        @font-face {
+            font-family: 'CooperBlkBT-Italic';
+            src: url('/static/fonts/CooperBlkBT-Italic.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperBlkBT-Regular';
+            src: url('/static/fonts/CooperBlkBT-Regular.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperLtBT-Bold';
+            src: url('/static/fonts/CooperLtBT-Bold.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperLtBT-BoldItalic';
+            src: url('/static/fonts/CooperLtBT-BoldItalic.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperLtBT-Italic';
+            src: url('/static/fonts/CooperLtBT-Italic.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperLtBT-Regular';
+            src: url('/static/fonts/CooperLtBT-Regular.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'CooperMdBT-Regular';
+            src: url('/static/fonts/CooperMdBT-Regular.ttf') format('truetype');
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            position: relative;
+            width: 1084px;
+            height: 799px;
+            margin: 20px auto;
+        }
+
+        .certificate-template {
+            position: absolute;
+            top: 27px;
+            left: 64px;
+            width: 105%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .draggable {
+            position: absolute;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            cursor: grab;
+            border-radius: 5px;
+            transform: translate(0, 0);
+            will-change: transform;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .draggable span {
+            display: inline-block;
+            min-width: 50px;
+        }
+
+        #name {
+            top: 280px;
+            left: 442px;
+        }
+
+        #certificate_id {
+            top: 600px;
+            left: 160px;
+        }
+
+        #course_duration {
+            top: 600px;
+            left: 850px;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #font-settings {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        select, input {
+            margin: 5px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        label {
+            display: inline-block;
+            margin: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="font-settings">
+        <label for="element-select">Select Element:</label>
+        <select id="element-select">
+            <option value="name">User Name</option>
+            <option value="certificate_id">Certificate ID</option>
+            <option value="course_duration">Course Duration</option>
+        </select>
+        <br>
+        <label for="font-select">Font:</label>
+        <select id="font-select">
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="CooperBlkBT-Italic">Cooper Black Italic</option>
+            <option value="CooperBlkBT-Regular">Cooper Black Regular</option>
+            <option value="CooperLtBT-Bold">Cooper Light Bold</option>
+            <option value="CooperLtBT-BoldItalic">Cooper Light Bold Italic</option>
+            <option value="CooperLtBT-Italic">Cooper Light Italic</option>
+            <option value="CooperLtBT-Regular">Cooper Light Regular</option>
+            <option value="CooperMdBT-Regular">Cooper Medium Regular</option>
+        </select>
+        <br>
+        <label for="font-size">Size:</label>
+        <input type="number" id="font-size" value="20" min="10" max="100">
+        <button onclick="updateFont()">Apply Font</button>
+    </div>
+
+    <div class="container">
+        <img src="/static/templates/certificate-template.jpg" alt="Certificate Template" class="certificate-template">
+        
+        <div class="draggable" id="name">
+            <span contenteditable="true">{{ user_name }}</span>
+        </div>
+        <div class="draggable" id="certificate_id">
+            <span contenteditable="true">{{ certificate_id }}</span>
+        </div>
+        <div class="draggable" id="course_duration">
+            <span contenteditable="true">{{ course_duration }}</span>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button onclick="savePositions()">Save Positions</button>
+        <form id="download-form" action="/download-pdf" method="POST" style="display: inline;">
+            <input type="hidden" name="user_name" id="hidden-name">
+            <input type="hidden" name="course_duration" id="hidden-course_duration">
+            <input type="hidden" name="certificate_id" id="hidden-certificate_id">
+            <button type="submit" onclick="return prepareDownload()">Download PDF</button>
+        </form>
+    </div>
+
+    <script>
+        let elements = {};
+        let currentPositions = {};
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/get-positions');
+                const positions = await response.json();
+                
+                document.querySelectorAll('.draggable').forEach(elem => {
+                    const id = elem.id;
+                    if (positions[id]) {
+                        const pos = positions[id];
+                        elem.style.top = pos.top + 'px';
+                        elem.style.left = pos.left + 'px';
+                        const span = elem.querySelector('span');
+                        span.style.fontSize = pos.fontSize + 'px';
+                        span.style.fontFamily = pos.fontStyle;
+                    }
+                    initializeDraggable(elem);
+                });
+            } catch (error) {
+                console.error('Error loading positions:', error);
+            }
+        });
+
+        function initializeDraggable(element) {
+            let isDragging = false;
+            let startPos = { x: 0, y: 0 };
+
+            element.addEventListener('mousedown', onMouseDown);
+            
+            function onMouseDown(e) {
+                if (e.target.tagName.toLowerCase() === 'span') return;
+                
+                isDragging = true;
+                const rect = element.getBoundingClientRect();
+                startPos = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                element.style.cursor = 'grabbing';
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const container = document.querySelector('.container');
+                const containerRect = container.getBoundingClientRect();
+                
+                const newLeft = e.clientX - containerRect.left - startPos.x;
+                const newTop = e.clientY - containerRect.top - startPos.y;
+                
+                element.style.left = `${newLeft}px`;
+                element.style.top = `${newTop}px`;
+            }
+
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                element.style.cursor = 'grab';
+            }
+        }
+
+        function calculateOptimalFontSize(element, maxWidth, maxHeight, initialFontSize = 46) {
+            const span = element.querySelector('span');
+            const text = span.textContent;
+            
+            const temp = document.createElement('span');
+            temp.style.visibility = 'hidden';
+            temp.style.position = 'absolute';
+            temp.style.whiteSpace = 'nowrap';
+            temp.style.fontFamily = window.getComputedStyle(span).fontFamily;
+            temp.textContent = text;
+            document.body.appendChild(temp);
+
+            let low = 1;
+            let high = initialFontSize;
+            let optimal = initialFontSize;
+
+            while (low <= high) {
+                const mid = Math.floor((low + high) / 2);
+                temp.style.fontSize = `${mid}px`;
+
+                if (temp.offsetWidth <= maxWidth && temp.offsetHeight <= maxHeight) {
+                    optimal = mid;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            document.body.removeChild(temp);
+            return optimal;
+        }
+
+        function updateFont() {
+            const selectedElement = document.getElementById('element-select').value;
+            const font = document.getElementById('font-select').value;
+            const fontSize = document.getElementById('font-size').value;
+            const element = document.getElementById(selectedElement);
+            const span = element.querySelector('span');
+            
+            span.style.fontFamily = font;
+            
+            if (selectedElement === 'name') {
+                const optimalSize = calculateOptimalFontSize(element, 600, 80);
+                span.style.fontSize = `${optimalSize}px`;
+            } else {
+                span.style.fontSize = `${fontSize}px`;
+            }
+        }
+
+        async function savePositions() {
+            try {
+                const positions = {};
+                const container = document.querySelector('.container');
+                const containerRect = container.getBoundingClientRect();
+
+                document.querySelectorAll('.draggable').forEach(elem => {
+                    const rect = elem.getBoundingClientRect();
+                    const span = elem.querySelector('span');
+                    
+                    positions[elem.id] = {
+                        top: Math.round(rect.top - containerRect.top),
+                        left: Math.round(rect.left - containerRect.left),
+                        fontSize: parseInt(window.getComputedStyle(span).fontSize),
+                        fontStyle: window.getComputedStyle(span).fontFamily.split(',')[0].trim()
+                    };
+                });
+
+                const response = await fetch('/save-positions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(positions)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Settings saved successfully');
+                } else {
+                    throw new Error('Failed to save positions');
+                }
+            } catch (error) {
+                console.error('Error saving positions:', error);
+                alert('Error saving positions: ' + error.message);
+            }
+        }
+
+        function prepareDownload() {
+            document.querySelectorAll('.draggable').forEach(elem => {
+                const span = elem.querySelector('span');
+                const id = elem.id;
+                document.getElementById(`hidden-${id}`).value = span.textContent.trim();
+            });
+            return true;
+        }
+    </script>
+</body>
+</html>

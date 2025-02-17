@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Certificate Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .form-container h1 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-upload {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .file-upload .upload-group {
+            margin-bottom: 15px;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .file-input-container input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .divider {
+            margin: 30px 0;
+            border-top: 1px solid #ddd;
+        }
+        .delete-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.template-status {
+    margin-top: 10px;
+    font-size: 14px;
+}
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Enter Details for {{ course_name }}</h1>
+        
+        <!-- Certificate Template Upload Section -->
+        <div class="file-upload">
+            <h3>Upload Certificate Templates</h3>
+            <div class="template-status">
+                <p>Current templates:</p>
+                <p id="jpgStatus">JPG Template: Checking...</p>
+                <p id="pdfStatus">PDF Template: Checking...</p>
+                <button id="deleteTemplatesBtn" class="delete-button" style="display: none;">
+                    Delete Existing Templates
+                </button>
+            </div>
+            <form id="templateUploadForm" action="/upload-templates" method="POST" enctype="multipart/form-data">
+                <div class="upload-group">
+                    <label for="jpgTemplate">Upload JPG Template:</label>
+                    <div class="file-input-container">
+                        <input type="file" id="jpgTemplate" name="jpgTemplate" accept=".jpg">
+                        <div class="error-message" id="jpgError"></div>
+                        <div class="success-message" id="jpgSuccess"></div>
+                    </div>
+                </div>
+                
+                <div class="upload-group">
+                    <label for="pdfTemplate">Upload PDF Template:</label>
+                    <div class="file-input-container">
+                        <input type="file" id="pdfTemplate" name="pdfTemplate" accept=".pdf">
+                        <div class="error-message" id="pdfError"></div>
+                        <div class="success-message" id="pdfSuccess"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" id="uploadTemplatesBtn">Upload Templates</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Original Certificate Details Form -->
+        <form action="/certificate-preview" method="post">
+            <input type="hidden" name="course_name" value="{{ course_name }}">
+            <div class="form-group">
+                <label for="user_name">User Name</label>
+                <input type="text" id="user_name" name="user_name" required>
+            </div>
+            <div class="form-group">
+                <label for="font">Select Font for User Name</label>
+                <select id="font" name="font">
+                    <option value="CooperBlkBT-Italic">CooperBlkBT-Italic</option>
+                    <option value="CooperBlkBT-Regular">CooperBlkBT-Regular</option>
+                    <option value="CooperLtBT-Bold">CooperLtBT-Bold</option>
+                    <option value="CooperLtBT-BoldItalic">CooperLtBT-BoldItalic</option>
+                    <option value="CooperLtBT-Italic">CooperLtBT-Italic</option>
+                    <option value="CooperLtBT-Regular">CooperLtBT-Regular</option>
+                    <option value="CooperMdBT-Regular">CooperMdBT-Regular</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="course_duration">Course Duration</label>
+                <input type="text" id="course_duration" name="course_duration" required>
+            </div>
+            <div class="form-group">
+                <label for="certificate_id">Certificate ID</label>
+                <input type="text" id="certificate_id" name="certificate_id" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Preview Certificate</button>
+            </div>
+        </form>
+
+        <div class="divider"></div>
+
+        <!-- CSV Upload Form -->
+        <form action="/upload-csv" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="csv-file">Upload CSV for Bulk Certificate Generation:</label>
+                <input type="file" id="csv-file" name="csv_file" accept=".csv" required>
+                <button type="submit">Upload and Generate</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateUploadForm = document.getElementById('templateUploadForm');
+            const jpgTemplate = document.getElementById('jpgTemplate');
+            const pdfTemplate = document.getElementById('pdfTemplate');
+            const jpgError = document.getElementById('jpgError');
+            const pdfError = document.getElementById('pdfError');
+            const jpgSuccess = document.getElementById('jpgSuccess');
+            const pdfSuccess = document.getElementById('pdfSuccess');
+
+            function validateFile(file, expectedName, fileType) {
+                if (!file) {
+                    return { valid: false, message: 'Please select a file.' };
+                }
+
+                if (file.name !== expectedName) {
+                    return { valid: false, message: `File must be named "${expectedName}"` };
+                }
+
+                const extension = fileType === 'jpg' ? '.jpg' : '.pdf';
+                if (!file.name.toLowerCase().endsWith(extension)) {
+                    return { valid: false, message: `File must be a ${fileType.toUpperCase()} file.` };
+                }
+
+                return { valid: true, message: 'File is valid.' };
+            }
+
+            function showMessage(element, message, isError) {
+                element.textContent = message;
+                element.style.display = 'block';
+                element.style.color = isError ? '#dc3545' : '#28a745';
+            }
+
+            jpgTemplate.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const validation = validateFile(file, 'certificate-template.jpg', 'jpg');
+                
+                if (!validation.valid) {
+                    showMessage(jpgError, validation.message, true);
+                    jpgSuccess.style.display = 'none';
+                    e.target.value = '';
+                } else {
+                    jpgError.style.display = 'none';
+                    showMessage(jpgSuccess, 'Valid template file selected', false);
+                }
+            });
+
+            pdfTemplate.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const validation = validateFile(file, 'certificate-template.pdf', 'pdf');
+                
+                if (!validation.valid) {
+                    showMessage(pdfError, validation.message, true);
+                    pdfSuccess.style.display = 'none';
+                    e.target.value = '';
+                } else {
+                    pdfError.style.display = 'none';
+                    showMessage(pdfSuccess, 'Valid template file selected', false);
+                }
+            });
+
+            templateUploadForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData();
+                const jpgFile = jpgTemplate.files[0];
+                const pdfFile = pdfTemplate.files[0];
+
+                if (!jpgFile || !pdfFile) {
+                    alert('Please select both JPG and PDF template files.');
+                    return;
+                }
+
+                formData.append('jpgTemplate', jpgFile);
+                formData.append('pdfTemplate', pdfFile);
+
+                try {
+                    const response = await fetch('/upload-templates', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert('Templates uploaded successfully!');
+                        // Reset form and success messages
+                        templateUploadForm.reset();
+                        jpgSuccess.style.display = 'none';
+                        pdfSuccess.style.display = 'none';
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                } catch (error) {
+                    alert('Error uploading templates. Please try again.');
+                }
+            });
+        });
+        // Function to check template existence
+async function checkTemplates() {
+    try {
+        const response = await fetch('/check-templates');
+        const data = await response.json();
+        
+        document.getElementById('jpgStatus').textContent = 
+            `JPG Template: ${data.jpg_exists ? 'Present' : 'Not found'}`;
+        document.getElementById('pdfStatus').textContent = 
+            `PDF Template: ${data.pdf_exists ? 'Present' : 'Not found'}`;
+            
+        const deleteBtn = document.getElementById('deleteTemplatesBtn');
+        deleteBtn.style.display = (data.jpg_exists || data.pdf_exists) ? 'block' : 'none';
+    } catch (error) {
+        console.error('Error checking templates:', error);
+    }
+}
+
+// Add delete button functionality
+document.getElementById('deleteTemplatesBtn').addEventListener('click', async function() {
+    if (confirm('Are you sure you want to delete the existing templates?')) {
+        try {
+            const response = await fetch('/delete-templates', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                alert('Templates deleted successfully');
+                // Refresh template status
+                checkTemplates();
+            } else {
+                throw new Error('Failed to delete templates');
+            }
+        } catch (error) {
+            alert('Error deleting templates: ' + error.message);
+        }
+    }
+});
+
+// Check templates on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkTemplates();
+});
+    </script>
+</body>
+</html>
